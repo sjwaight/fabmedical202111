@@ -61,25 +61,17 @@ jobs:
     - name: Helm Install
       uses: azure/setup-helm@v1
 
-    - name: Helm Repo Add
-      run: |
-        helm repo add ${{ env.containerRegistryName }} https://${{ env.containerRegistry }}/helm/v1/repo --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-      env:
-        HELM_EXPERIMENTAL_OCI: 1
-
     - name: Helm Chart Save
       run: |
         cd ./content-web/charts/web
-
-        helm package . --app-version v${{ env.tag }}
-
+        helm package .
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
     - name: Helm Chart Push
       run: |
         helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-        helm push oci://${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
+        helm push content-web-0.1.0.tgz oci://${{ env.containerRegistry }}/helm
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
