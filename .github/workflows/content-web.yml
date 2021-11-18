@@ -90,18 +90,18 @@ jobs:
     - name: kubeconfig
       run: echo "${{ secrets.KUBECONFIG }}" >> kubeconfig
 
-    - name: Helm Repo Add
+    - name: Helm Upgrade
       run: |
         helm repo add ${{ env.containerRegistry }} https://${{ env.containerRegistry }}/helm/v1/repo --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
         helm repo update
+        helm upgrade ${{ env.containerRegistry }}/helm/web
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
-    - name: Helm Upgrade
-      run: |
-        helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-        helm pull ${{ env.containerRegistry }}/helm/web-0.1.0.tgz
-        helm upgrade web-0.1.0.tgz ./upgrade/web
-      env:
-        KUBECONFIG: './kubeconfig'
-        HELM_EXPERIMENTAL_OCI: 1
+    # - name: Helm Upgrade
+    #   run: |
+    #     helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
+    #     helm upgrade ${{ env.containerRegistry }}/helm/web
+    #   env:
+    #     KUBECONFIG: './kubeconfig'
+    #     HELM_EXPERIMENTAL_OCI: 1
