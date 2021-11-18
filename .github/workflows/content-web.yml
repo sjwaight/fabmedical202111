@@ -71,18 +71,16 @@ jobs:
       run: |
         cd ./content-web/charts/web
 
-        helm chart save . content-web:v${{ env.tag }}
-        helm chart save . ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
+        helm package . content-web:v${{ env.tag }}
+        helm package . ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
 
-        # list out saved charts
-        helm chart list
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
     - name: Helm Chart Push
       run: |
         helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-        helm chart push ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
+        helm push ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
