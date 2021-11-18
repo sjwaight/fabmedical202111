@@ -94,7 +94,7 @@ jobs:
       run: |
         helm repo add ${{ env.containerRegistry }} https://${{ env.containerRegistry }}/helm/v1/repo --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
         helm repo update
-        helm upgrade ${{ env.containerRegistry }}/helm/web
+        helm upgrade web ${{ env.containerRegistry }}/helm/web:0.1.0
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
