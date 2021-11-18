@@ -60,21 +60,34 @@ jobs:
 
     - name: Helm Install
       uses: azure/setup-helm@v1
+      with:
+        version: "3.4.0"
+
+    - name: Helm Repo Add
+      run: |
+        helm repo add ${{ env.containerRegistryName }} https://${{ env.containerRegistry }}/helm/v1/repo --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
+      env:
+        HELM_EXPERIMENTAL_OCI: 1
 
     - name: Helm Chart Save
       run: |
         cd ./content-web/charts/web
-        helm package .
+
+        helm chart save . content-web:v${{ env.tag }}
+        helm chart save . ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
+
+        # list out saved charts
+        helm chart list
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
     - name: Helm Chart Push
       run: |
-        cd ./content-web/charts/web
         helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-        helm push web-0.1.0.tgz oci://${{ env.containerRegistry }}/helm
+        helm chart push ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
       env:
         HELM_EXPERIMENTAL_OCI: 1
+
 
   aks-deployment:
     name: AKS Deployment
@@ -86,23 +99,26 @@ jobs:
 
     - name: Helm Install
       uses: azure/setup-helm@v1
+      with:
+        version: "3.4.0"
 
     - name: kubeconfig
       run: echo "${{ secrets.KUBECONFIG }}" >> kubeconfig
 
-    - name: Helm Upgrade
+    - name: Helm Repo Add
       run: |
         helm repo add ${{ env.containerRegistry }} https://${{ env.containerRegistry }}/helm/v1/repo --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
         helm repo update
-        helm pull oci://fabmedicalsjw.azurecr.io/helm/web --version 0.1.0
-        helm upgrade 0.1.0 oci://${{ env.containerRegistry }}/helm/web --version 0.1.0
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
-    # - name: Helm Upgrade
-    #   run: |
-    #     helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-    #     helm upgrade ${{ env.containerRegistry }}/helm/web
-    #   env:
-    #     KUBECONFIG: './kubeconfig'
-    #     HELM_EXPERIMENTAL_OCI: 1
+    - name: Helm Upgrade
+      run: |
+        helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
+        helm chart pull ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
+        helm chart export ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }} --destination ./upgrade
+        helm upgrade web ./upgrade/web
+      env:
+        KUBECONFIG: './kubeconfig'
+        HELM_EXPERIMENTAL_OCI: 1
+
