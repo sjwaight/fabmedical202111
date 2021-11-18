@@ -71,8 +71,7 @@ jobs:
       run: |
         cd ./content-web/charts/web
 
-        helm package . content-web:v${{ env.tag }}
-        helm package . ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
+        helm package . --app-version v${{ env.tag }}
 
       env:
         HELM_EXPERIMENTAL_OCI: 1
@@ -80,7 +79,7 @@ jobs:
     - name: Helm Chart Push
       run: |
         helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-        helm push ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
+        helm push oci://${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
