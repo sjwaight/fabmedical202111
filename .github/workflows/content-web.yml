@@ -70,6 +70,7 @@ jobs:
 
     - name: Helm Chart Push
       run: |
+        cd ./content-web/charts/web
         helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
         helm push web-0.1.0.tgz oci://${{ env.containerRegistry }}/helm
       env:
@@ -99,9 +100,8 @@ jobs:
     - name: Helm Upgrade
       run: |
         helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-        helm chart pull ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
-        helm chart export ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }} --destination ./upgrade
-        helm upgrade web ./upgrade/web
+        helm pull ${{ env.containerRegistry }}/helm/web-0.1.0.tgz
+        helm upgrade web-0.1.0.tgz ./upgrade/web
       env:
         KUBECONFIG: './kubeconfig'
         HELM_EXPERIMENTAL_OCI: 1
