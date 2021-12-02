@@ -4,7 +4,7 @@ name: content-web
 on:
   push:
     branches:
-        - main
+        - helm-versioning
     paths:
         - 'content-web/**'
 
@@ -13,6 +13,7 @@ on:
 
 # Environment variables are defined so that they can be used throughout the job definitions.
 env:
+  appMajorMinorVersion: 0.1
   imageRepository: 'content-web'
   resourceGroupName: 'fabmedical-sjw'
   containerRegistryName: 'fabmedicalsjw'
@@ -60,34 +61,20 @@ jobs:
 
     - name: Helm Install
       uses: azure/setup-helm@v1
-      with:
-        version: "3.4.0"
 
-    - name: Helm Repo Add
-      run: |
-        helm repo add ${{ env.containerRegistryName }} https://${{ env.containerRegistry }}/helm/v1/repo --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-      env:
-        HELM_EXPERIMENTAL_OCI: 1
-
-    - name: Helm Chart Save
-      run: |
-        cd ./content-web/charts/web
-
-        helm chart save . content-web:v${{ env.tag }}
-        helm chart save . ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
-
-        # list out saved charts
-        helm chart list
-      env:
-        HELM_EXPERIMENTAL_OCI: 1
-
-    - name: Helm Chart Push
+    - name: Helm Repo Login
       run: |
         helm registry login ${{ env.containerRegistry }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-        helm chart push ${{ env.containerRegistry }}/helm/content-web:v${{ env.tag }}
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
+    - name: Helm Chart Package and Push
+      run: |
+        cd ./content-web/charts/web
+        helm package . --app-version ${{ env.appMajorMinorVersion }}.${{ env.tag }}
+        helm push web-${{ env.appMajorMinorVersion }}.${{ env.tag }}.tgz oci://${{ env.containerRegistry }}/helm
+      env:
+        HELM_EXPERIMENTAL_OCI: 1
 
   aks-deployment:
     name: AKS Deployment
