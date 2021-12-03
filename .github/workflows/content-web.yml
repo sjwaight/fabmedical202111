@@ -15,9 +15,9 @@ on:
 env:
   appMajorMinorVersion: 0.1
   imageRepository: 'content-web'
-  resourceGroupName: 'fabmedical-sjw'
-  containerRegistryName: 'fabmedicalsjw'
-  containerRegistry: 'fabmedicalsjw.azurecr.io'
+  resourceGroupName: 'helm-blog'
+  containerRegistryName: 'helmdemo01'
+  containerRegistry: 'helmdemo01.azurecr.io'
   dockerfilePath: './content-web'
   tag: '${{ github.run_id  }}'
 
