@@ -13,6 +13,7 @@ on:
 
 # Environment variables are defined so that they can be used throughout the job definitions.
 env:
+  chartVersion: 0.1.0
   appMajorMinorVersion: 0.1
   imageRepository: 'content-web'
   resourceGroupName: 'helm-blog'
@@ -68,11 +69,12 @@ jobs:
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
-    - name: Helm Chart Package and Push
+    - name: Helm Chart Update, Package and Push
       run: |
+        sed -i 's/version\: 0\.0\.0/version\:${{ env.chartVersion }}/' Chart.yaml
         cd ./content-web/charts/web
         helm package . --app-version ${{ env.appMajorMinorVersion }}.${{ env.tag }}
-        helm push web-${{ env.appMajorMinorVersion }}.${{ env.tag }}.tgz oci://${{ env.containerRegistry }}/helm
+        helm push web-${{ env.chartVersion }}.tgz oci://${{ env.containerRegistry }}/helm
       env:
         HELM_EXPERIMENTAL_OCI: 1
 
