@@ -73,7 +73,7 @@ jobs:
       run: |
         cd ./content-web/charts/web
         escaped_version=$(printf '%s\n' "${{ env.chartVersion }}" | sed -e 's/[\/.]/\\./g')
-        sed -i "s/version\: 0\.0\.0/version\: ${{env.escaped_version}}/" Chart.yaml
+        sed -i "s/version\: 0\.0\.0/version\: $escaped_version/" Chart.yaml
         
         helm package . --app-version ${{ env.appMajorMinorVersion }}.${{ env.tag }}
         helm push web-${{ env.chartVersion }}.tgz oci://${{ env.containerRegistry }}/helm
