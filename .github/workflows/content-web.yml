@@ -72,7 +72,7 @@ jobs:
     - name: Helm Chart Update, Package and Push
       run: |
         cd ./content-web/charts/web
-        sed -i 's/version\: 0\.0\.0/version\:${{ env.chartVersion }}/' Chart.yaml
+        sed -i "s/version\: 0\.0\.0/version\:${{ env.chartVersion }}/" Chart.yaml
         
         helm package . --app-version ${{ env.appMajorMinorVersion }}.${{ env.tag }}
         helm push web-${{ env.chartVersion }}.tgz oci://${{ env.containerRegistry }}/helm
