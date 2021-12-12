@@ -100,7 +100,7 @@ jobs:
       
     - name: Helm Upgrade
       run: |      
-        helm upgrade web-${{ env.tag }}  oci://${{ env.containerRegistry }}/helm/web --version ${{ env.chartVersion }}
+        helm upgrade web  oci://${{ env.containerRegistry }}/helm/web --install --version ${{ env.chartVersion }}
         
       env:
         KUBECONFIG: './kubeconfig'
